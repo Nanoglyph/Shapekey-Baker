@@ -1,8 +1,8 @@
 bl_info = {
     "name": "ShapeKey Baker",
     "author": "Nanoglyph",
-    "version": (1, 0),
-    "blender": (3, 1, 0),
+    "version": (1, 1),
+    "blender": (3, 1, 2),
     "location": "View3D > Toolshelf > Tools",
     "description": "Apply the current blend of shape keys to the basis, and all shapekeys",
     "warning": "",
@@ -23,33 +23,26 @@ class SKeyBakerMainPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        
-        """Bake All Shape Keys"""
         row = layout.row()
-        row.label(text= 'Bake All Shape Keys')
+        row.label(text= 'ShapeKey baking utilities')
+        """Bake to Shape Keys"""
         row = layout.row()
         row.operator('shapekey.bakeall_operator')
         
         """Bake And Delete Shape Keys"""
         row = layout.row()
-        row.label(text= ' ')
-        row = layout.row()
-        row.label(text= 'Bake and Delete Shape Keys')
-        row = layout.row()
         row.operator('shapekey.bakedelete_operator')
         
         """Alphabetize Shape Keys"""
         row = layout.row()
-        row.label(text= ' ')
-        row = layout.row()
-        row.label(text= 'Alphabetize Shape Keys')
+        row.label(text= 'Other utilities')
         row = layout.row()
         row.operator('shapekey.alphabetize_all_operator')
 
 """CREATE SHAPEKEY OPERATOR TYPE BAKE ALL"""
 class SHAPEKEY_OT_BAKEALL(bpy.types.Operator):
     # Button label and operator ID
-    bl_label = 'Bake All'
+    bl_label = 'Bake to ShapeKeys'
     bl_idname = 'shapekey.bakeall_operator'
 
     def execute(self, context):
@@ -71,6 +64,7 @@ class SHAPEKEY_OT_BAKEALL(bpy.types.Operator):
         subD = False
         suffix = '__axpxp'
         count = 0
+        currentSK = ob.active_shape_key.name
         
         """PREP WORK"""
         # Rename 'OriginalBasis' if it already exists
@@ -149,6 +143,12 @@ class SHAPEKEY_OT_BAKEALL(bpy.types.Operator):
         # the mesh reverts to the original Basis if we don't.
         bpy.ops.object.editmode_toggle()
         bpy.ops.object.editmode_toggle()
+
+        try:
+            # Go to user's current shapekey
+            ob.active_shape_key_index = skeys.find(currentSK)
+        except:
+            print('')
         
         # Re-enable subdvivision if it had been enabled
         if subD == True:
@@ -159,7 +159,7 @@ class SHAPEKEY_OT_BAKEALL(bpy.types.Operator):
 """CREATE SHAPEKEY OPERATOR TYPE BAKE AND DELETE"""
 class SHAPEKEY_OT_BAKEDELETE(bpy.types.Operator):
     # Button label and operator ID
-    bl_label = 'Bake and Delete'
+    bl_label = 'Bake and Delete ShapeKeys'
     bl_idname = 'shapekey.bakedelete_operator'
 
     def execute(self, context):
@@ -200,7 +200,7 @@ class SHAPEKEY_OT_BAKEDELETE(bpy.types.Operator):
 """CREATE SHAPEKEY OPERATOR TYPE ALPHABETIZE"""
 class SHAPEKEY_OT_ALPHABETIZE(bpy.types.Operator):
     # Button label and operator ID
-    bl_label = 'Alphabetize'
+    bl_label = 'Alphabetize ShapeKeys'
     bl_idname = 'shapekey.alphabetize_all_operator'
 
     def execute(self, context):     
@@ -211,6 +211,7 @@ class SHAPEKEY_OT_ALPHABETIZE(bpy.types.Operator):
             print("\nNo shape keys found. Cancelling operation\n")
             return {'FINISHED'}
         basisName = 'Basis'
+        currentSK = ob.active_shape_key.name
         
         """"PREP WORK"""
         # Get name of key at top of stack (usually Basis)
@@ -238,6 +239,8 @@ class SHAPEKEY_OT_ALPHABETIZE(bpy.types.Operator):
                 bpy.ops.object.shape_key_move(type='BOTTOM')
         
         """CLEAN UP"""
+        # Go to user's current shapekey
+        ob.active_shape_key_index = skeys.find(currentSK)
         # Re-enable subdvivision if it had been enabled
         if subD == True:
             ob.modifiers['Subdivision'].show_viewport = True
