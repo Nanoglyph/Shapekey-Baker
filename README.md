@@ -23,3 +23,24 @@ The addon has a couple utilities:
 3. Check the box for `Mesh: ShapeKey Baker` to enable it.
 
 4. You can now find the *Bake ShapeKeys* utilities under the `N-Panel > Tools > ShapeKey Baker`.
+
+## Technical Considerations
+
+- Preserves min/max range values for each shape key.
+- Preserves original *Basis* as a shape key named *OriginalBasis* that is relative to the new *Basis*. You can delete it if you want, but the code doesn’t assume.
+- Disables Subdivision modifier (if enabled for viewport) for 
+  performance, then re-enables (if it had been enabled). Not tested on more than one subdivision modifier.
+- New keys will be in the same order as the old (aside from 
+  OriginalBasis being the second key in the list), and will have the same 
+  names.
+
+**Caveats:**
+
+- Will not preserve vertex groups on shape keys, they will be applied 
+  as part of the new shape key instead. It will not carry over any 
+  “relative to” relationships either. This is the same behavior as *New 
+  shape from mix*.
+- Disable multires before running.
+- May be slow on higher poly meshes with 100+ shapekeys. This is why 
+  I’ve set it to disable and re-enable the subdiv modifier, but that won’t
+   help if the mesh is just naturally high poly.
